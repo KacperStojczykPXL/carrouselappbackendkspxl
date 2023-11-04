@@ -12,7 +12,12 @@ const db = require('./db');
 
 const PORT = process.env.PORT || 3000;
 
-app.use(cors());
+app.use(cors({
+  origin: '*',
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  preflightContinue: false,
+  optionsSuccessStatus: 204,
+}));
 app.use(express.json());
 
 app.use('/health', healthRoutes);
