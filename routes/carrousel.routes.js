@@ -1,33 +1,25 @@
-const express = require("express");
+const express = require('express');
 const carrouselRouter = express.Router();
-const AWS = require("aws-sdk");
+const { S3Client, ListObjectsV2Command } = require('@aws-sdk/client-s3');
 
-AWS.config.update({
-    region: "us-east-1",
-});
+const bucketName = 'images-carrousel-kacperstojczyk2023';
 
-const s3 = new AWS.S3();
-const bucketName = "images-carrousel-kacperstojczyk2023";
+async function getS3ObjectUrls() {
+  const client = new S3Client({ region: "us-east-1" })
+  const command = new ListObjectsV2Command({ Bucket: bucketName });
 
-carrouselRouter.get("", async (req, res) => {
-    try {
-        const response = await s3
-            .listObjectsV2({
-                Bucket: bucketName,
-            })
-            .promise();
+  try {
+    const result = await client.send(command);
+    return result.Contents.map((obj) => `https://${bucketName}.s3.amazonaws.com/${obj.Key}`);
+  } catch (err) {
+    console.error("Error fetching S3 objects:", err);
+    return [];
+  }
+}
 
-        const publicUrls = response.Contents.map((obj) => {
-            return {
-                url: `https://${bucketName}.s3.amazonaws.com/${obj.Key}`,
-        };
-        });
-
-        res.json(publicUrls);
-    } catch (error) {
-        console.error("Error retrieving files from bucket:", error);
-        res.status(500).json({ error: "Error retrieving files from bucket" });
-    }
+carrouselRouter.get('', async (req, res) => {
+    const imageUrls = await getS3ObjectUrls();
+    res.json(imageUrls.map(url => ({ url })));
 });
 
 module.exports = carrouselRouter;
