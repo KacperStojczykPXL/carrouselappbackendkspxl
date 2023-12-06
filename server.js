@@ -11,6 +11,7 @@ const db = require('./db');
 
 
 const PORT = process.env.PORT || 3000;
+const apiurl = process.env.APIURL || '/test/api';
 
 app.use(cors({
   origin: '*',
@@ -20,9 +21,9 @@ app.use(cors({
 }));
 app.use(express.json());
 
-app.use('/health', healthRoutes);
-app.use('/todo', todoRoutes);
-app.use('/carrousel', carrouselRoutes)
+app.use(apiurl + '/health', healthRoutes);
+app.use(apiurl + '/todo', todoRoutes);
+app.use(apiurl + '/carrousel', carrouselRoutes)
 
 app.listen(PORT, () => {
     console.log(`Server is listening on port ${PORT}`);
